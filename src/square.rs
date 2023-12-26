@@ -385,6 +385,14 @@ impl Square {
         Square::from_str(&s).ok()
     }
 
+    pub fn mirror_horizontal(&self) -> Square {
+        Square::make_square(self.get_rank(), self.get_file().mirror_horizontal())
+    }
+
+    pub fn mirror_vertical(&self) -> Square {
+        Square::make_square(self.get_rank().mirror_vertical(), self.get_file())
+    }
+
     /// The A1 square on the chess board
     ///
     /// ```

@@ -65,6 +65,10 @@ impl File {
     pub fn to_index(&self) -> usize {
         *self as usize
     }
+
+    pub fn mirror_horizontal(&self) -> File {
+        File::from_index(7 - self.to_index())
+    }
 }
 
 impl FromStr for File {

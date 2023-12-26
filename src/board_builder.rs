@@ -174,7 +174,7 @@ impl BoardBuilder {
     /// ```
     /// use chess::{BoardBuilder, Color};
     /// BoardBuilder::new()
-    ///              .side_to_move(Color::Black);      
+    ///              .side_to_move(Color::Black);
     ///
     /// let mut bb = BoardBuilder::new();
     /// bb.side_to_move(Color::Black);
@@ -257,6 +257,35 @@ impl BoardBuilder {
     /// ```
     pub fn en_passant<'a>(&'a mut self, file: Option<File>) -> &'a mut Self {
         self.en_passant = file;
+        self
+    }
+
+    pub fn mirror_horizontal<'a>(&'a mut self) -> &'a mut Self {
+        self.en_passant = self.en_passant.map(|f| f.mirror_horizontal());
+        let mut new_pieces = [None; 64];
+        for sq in ALL_SQUARES.iter() {
+            let new_sq = sq.mirror_horizontal();
+            new_pieces[new_sq.to_index()] = self[*sq];
+        }
+        self.pieces = new_pieces;
+        self
+    }
+
+    pub fn mirror_vertical_and_swap_color<'a>(&'a mut self) -> &'a mut Self {
+        let mut new_pieces = [None; 64];
+        for sq in ALL_SQUARES.iter() {
+            let new_sq = sq.mirror_vertical();
+            new_pieces[new_sq.to_index()] = self[*sq];
+        }
+        self.pieces = new_pieces;
+        self.pieces.iter_mut().for_each(|x| {
+            if let Some((_piece, color)) = x {
+                *color = !*color;
+            }
+        });
+        self.side_to_move = !self.side_to_move;
+        self.castle_rights.swap(0, 1);
+        // self.en_passant = self.en_passant
         self
     }
 }

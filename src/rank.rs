@@ -66,6 +66,10 @@ impl Rank {
     pub fn to_index(&self) -> usize {
         *self as usize
     }
+
+    pub fn mirror_vertical(&self) -> Rank {
+        Rank::from_index(7 - self.to_index())
+    }
 }
 
 impl FromStr for Rank {
