@@ -60,10 +60,14 @@ impl ChessMove {
     /// ```
     pub fn from_san(board: &Board, move_text: &str) -> Result<ChessMove, Error> {
         // Castles first...
-        if move_text == "O-O" || move_text == "O-O-O" {
+        if move_text.get(..3) == Some("O-O") {
             let rank = board.side_to_move().to_my_backrank();
             let source_file = File::E;
-            let dest_file = if move_text == "O-O" { File::G } else { File::C };
+            let dest_file = if move_text.get(..5) == Some("O-O-O") {
+                File::C
+            } else {
+                File::G
+            };
 
             let m = ChessMove::new(
                 Square::make_square(rank, source_file),
@@ -269,22 +273,22 @@ impl ChessMove {
             sq
         };
 
-        let promotion = if let Some(s) = move_text.get(cur_index..(cur_index + 1)) {
+        let promotion = if let Some(s) = move_text.get(cur_index..(cur_index + 2)) {
             match s {
-                "N" => {
-                    cur_index += 1;
+                "=N" => {
+                    cur_index += 2;
                     Some(Piece::Knight)
                 }
-                "B" => {
-                    cur_index += 1;
+                "=B" => {
+                    cur_index += 2;
                     Some(Piece::Bishop)
                 }
-                "R" => {
-                    cur_index += 1;
+                "=R" => {
+                    cur_index += 2;
                     Some(Piece::Rook)
                 }
-                "Q" => {
-                    cur_index += 1;
+                "=Q" => {
+                    cur_index += 2;
                     Some(Piece::Queen)
                 }
                 _ => None,
@@ -307,15 +311,20 @@ impl ChessMove {
             };
         }
 
-        let ep = if let Some(s) = move_text.get(cur_index..) {
+        let mut ep = if let Some(s) = move_text.get(cur_index..) {
             s == " e.p."
         } else {
             false
         };
-
         //if ep {
         //    cur_index += 5;
         //}
+
+        if let Some(ep_sq) = board.en_passant() {
+            if ep_sq == dest.ubackward(board.side_to_move()) {
+                ep = true;
+            }
+        }
 
         // Ok, now we have all the data from the SAN move, in the following structures
         // moveing_piece, source_rank, source_file, taks, dest, promotion, maybe_check_or_mate, and
